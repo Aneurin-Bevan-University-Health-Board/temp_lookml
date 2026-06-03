@@ -1,19 +1,45 @@
 # ABUHB LookML Linter
 
 Custom rule-based linter. Catches best-practice violations before they reach Looker.
+Runs automatically on every `git commit` via pre-commit.
 
-## Install
+---
+
+## Setup (one-time per developer)
+
 ```bash
 pip install -r linter/requirements.txt
+pre-commit install
 ```
 
-## Usage
+That's it. The linter now runs automatically whenever you `git commit` any `.lkml` file.
+
+---
+
+## Pre-commit behaviour
+
+- Triggers only when `.lkml` files are staged
+- Blocks the commit if any **errors** are found
+- With `--strict` (default): also blocks on **warnings**
+- To bypass in an emergency: `git commit --no-verify` (use sparingly)
+
+### Run manually
+
 ```bash
-python linter/lookml_linter.py                   # lint entire repo
-python linter/lookml_linter.py views/base/        # lint a folder
-python linter/lookml_linter.py --strict           # fail on warnings (CI)
-python linter/lookml_linter.py --errors-only      # errors only
+# Lint all .lkml files right now
+pre-commit run lookml-lint --all-files
+
+# Or run the script directly
+python linter/lookml_linter.py
+python linter/lookml_linter.py views/base/        # specific folder
+python linter/lookml_linter.py --errors-only      # suppress warnings/info
 ```
+
+### Loosen strictness during onboarding
+
+If `--strict` is too noisy when first adopting this on an existing repo, edit `.pre-commit-config.yaml` and remove the `--strict` arg. Re-add it once warnings are resolved.
+
+---
 
 ## Rules
 
@@ -31,20 +57,23 @@ python linter/lookml_linter.py --errors-only      # errors only
 | `dimension_missing_description` | 🔵 info | Dimension missing `description:` |
 | `explore_missing_description` | 🔵 info | Explore missing `description:` |
 
+---
+
 ## Adding Rules
+
 Add checks inside `check_view()` or `check_model()` in `lookml_linter.py`.
 Append a `LintIssue` with `rule`, `message`, `severity`, and `location`.
 
+---
+
 ## CI (GitHub Actions)
 
-Add `.github/workflows/lint.yml` to your repo:
+To also run the linter on PRs, add `.github/workflows/lint.yml`:
 
 ```yaml
 name: LookML Lint
 on:
   pull_request:
-    branches: [main]
-  push:
     branches: [main]
 jobs:
   lint:
@@ -58,5 +87,4 @@ jobs:
       - run: python linter/lookml_linter.py --strict
 ```
 
-> **Note:** Adding this file requires a token with `workflow` scope.
-> Run `gh auth refresh -s workflow` then create the file manually or via CLI.
+> Requires a token with `workflow` scope: `gh auth refresh -s workflow`
