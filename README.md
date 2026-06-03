@@ -4,21 +4,62 @@ Best-practice LookML project structure for Looker development at ABUHB.
 
 ---
 
+## Quick Start
+
+1. Click **Use this template** → create your repo
+2. Open in GitHub Codespaces — the devcontainer installs the `Looker.lkml` VS Code extension automatically
+3. Install the pre-commit hook so the linter runs on every commit:
+   ```bash
+   pip install -r linter/requirements.txt
+   pre-commit install
+   ```
+4. Replace the example files with your own views and models
+5. Run LookML validation in the Looker IDE before every merge
+
+---
+
 ## Folder Structure
 
 ```
 .
-├── models/          # LookML model files (.model.lkml)
+├── .devcontainer/       # Codespaces config — LookML extension, Python linter
+├── .pre-commit-config.yaml  # Runs the linter automatically on git commit
+├── linter/              # Custom ABUHB LookML linter
+│   ├── lookml_linter.py
+│   ├── requirements.txt
+│   └── README.md        # Linter rules and CI setup
+├── models/              # LookML model files (.model.lkml)
 ├── views/
-│   ├── base/        # Raw table views — one per BigQuery table
-│   ├── derived/     # Derived tables (SQL or native DT)
-│   └── extended/    # Views that extend base views
-├── explores/        # Explore definitions (if split from models)
-├── tests/           # LookML data tests
-├── dashboards/      # LookML dashboards (.dashboard.lookml)
-├── manifests/       # manifest.lkml — project-level config
-└── docs/            # Extended documentation
+│   ├── base/            # Raw table views — one per BigQuery table
+│   ├── derived/         # Derived tables (SQL or native DT)
+│   └── extended/        # Views that extend base views
+├── explores/            # Explore definitions (if split from models)
+├── tests/               # LookML data tests
+├── dashboards/          # LookML dashboards (.dashboard.lookml)
+├── manifests/           # manifest.lkml — project-level config
+└── docs/                # Extended documentation
 ```
+
+---
+
+## Linter & Pre-commit Hook
+
+This repo includes a custom LookML linter at `linter/lookml_linter.py`. It is wired as a **pre-commit hook** — it runs automatically whenever you `git commit` a `.lkml` file and blocks the commit if violations are found.
+
+**Setup (one-time per developer):**
+```bash
+pip install -r linter/requirements.txt
+pre-commit install
+```
+
+**Run manually:**
+```bash
+python linter/lookml_linter.py               # lint entire repo
+python linter/lookml_linter.py views/base/   # lint a folder
+pre-commit run lookml-lint --all-files       # via pre-commit
+```
+
+See [`linter/README.md`](linter/README.md) for the full rule list and CI setup.
 
 ---
 
@@ -152,7 +193,7 @@ Always set `drill_fields` on key measures.
 ## Naming Conventions
 
 | Element | Convention | Example |
-|---------|------------|--------|
+|---------|------------|---------|
 | View file | `snake_case` matching table name | `patient_activity.view.lkml` |
 | Model file | `domain_name.model.lkml` | `clinical.model.lkml` |
 | Dimension | `snake_case` | `ward_id` |
@@ -190,14 +231,4 @@ test: patient_id_is_unique {
 }
 ```
 
-Run via the Looker IDE or `lookml-linter` in CI.
-
----
-
-## Getting Started
-
-1. Update `manifests/manifest.lkml` with your project name and connection
-2. Replace example views in `views/base/` with your BigQuery table views
-3. Define your explores in `models/`
-4. Add joins, dimensions, and measures iteratively
-5. Run LookML validation in the Looker IDE before every merge
+Run via the Looker IDE or `pre-commit run lookml-lint --all-files`.
