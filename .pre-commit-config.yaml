@@ -1,0 +1,27 @@
+# Pre-commit hook configuration for ABUHB LookML linter.
+#
+# Setup (one-time per developer):
+#   pip install pre-commit
+#   pre-commit install
+#
+# The linter will now run automatically on every `git commit`.
+# To run manually against all files:
+#   pre-commit run lookml-lint --all-files
+
+repos:
+  - repo: local
+    hooks:
+      - id: lookml-lint
+        name: ABUHB LookML Linter
+        entry: python linter/lookml_linter.py
+        language: python
+        additional_dependencies:
+          - lkml>=1.3.0
+          - rich>=13.0.0
+        # Only run when .lkml files are staged
+        files: \.lkml$
+        # Pass the repo root rather than individual staged file paths
+        # (the linter walks the tree itself)
+        pass_filenames: false
+        # Fail on warnings — set to false if too noisy during onboarding
+        args: ["--strict"]
