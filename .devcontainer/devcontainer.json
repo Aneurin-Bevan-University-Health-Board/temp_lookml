@@ -1,0 +1,25 @@
+{
+  "name": "LookML",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11-bullseye",
+  "hostRequirements": {
+    "cpus": 2,
+    "memory": "8gb"
+  },
+  "postCreateCommand": "pip install -r linter/requirements.txt",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Looker.lkml",
+        "ms-python.python",
+        "ms-python.black-formatter",
+        "esbenp.prettier-vscode"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "files.associations": {
+          "*.lkml": "lookml"
+        }
+      }
+    }
+  }
+}
