@@ -1,0 +1,4 @@
+*.lkml.bak
+.DS_Store
+.vscode/
+.idea/
